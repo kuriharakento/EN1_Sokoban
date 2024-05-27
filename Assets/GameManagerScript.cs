@@ -51,6 +51,11 @@ public class GameManagerScript : MonoBehaviour
         if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
         if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
 
+        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Wall")
+        {
+            return false;
+        }
+
 
         if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
@@ -108,6 +113,51 @@ public class GameManagerScript : MonoBehaviour
         return true;
     }
 
+    void Reset()
+    {
+        for (int y = 0; y < map.GetLength(0); y++)
+        {
+            for (int x = 0; x < map.GetLength(1); x++)
+            {
+                Destroy(field[y,x]);
+            }
+        }
+
+        field = new GameObject[map.GetLength(0), map.GetLength(1)];
+        for (int y = 0; y < map.GetLength(0); y++)
+        {
+            for (int x = 0; x < map.GetLength(1); x++)
+            {
+                if (map[y, x] == 1)
+                {
+                    field[y, x] = Instantiate(
+                        playerPrefab,
+                        IndexToPosition(new Vector2Int(x, y)),
+                        Quaternion.identity
+                    );
+                }
+
+                if (map[y, x] == 2)
+                {
+                    field[y, x] = Instantiate(
+                        boxPrefab,
+                        IndexToPosition(new Vector2Int(x, y)),
+                        Quaternion.identity
+                    );
+                }
+
+                if (map[y, x] == 5)
+                {
+                    field[y, x] = Instantiate(
+                        wallPrefab,
+                        IndexToPosition(new Vector2Int(x, y)),
+                        Quaternion.identity
+                    );
+                }
+            }
+        }
+    }
+
 
     public GameObject playerPrefab;
     public GameObject boxPrefab;
@@ -117,6 +167,7 @@ public class GameManagerScript : MonoBehaviour
     public GameObject clearText;
     public GameObject particlePrefab;
     public GameObject goalPrefab;
+    public GameObject wallPrefab;
 
     void Start()
     {
@@ -124,11 +175,15 @@ public class GameManagerScript : MonoBehaviour
 
         map = new int[,]
         {
-            { 0,0,0,0,0,0,0,0,0 },
-            { 0,0,1,0,2,3,0,0,0 },
-            { 3,2,0,0,2,3,0,0,0 },
-            { 0,0,0,0,0,0,0,0,0 },
-            { 0,0,0,0,0,0,0,0,0 },
+            { 5,5,5,5,5,5,5,5,5,5,5,5,5 },
+            { 5,3,5,0,0,0,0,0,0,0,0,0,5 },
+            { 5,0,5,0,0,3,5,2,0,0,0,0,5 },
+            { 5,0,5,0,0,0,0,0,0,0,0,0,5 },
+            { 5,0,0,0,0,0,0,0,0,0,0,0,5 },
+            { 5,0,2,0,0,0,0,0,3,2,0,0,5 },
+            { 5,0,0,0,3,2,0,0,2,3,0,0,5 },
+            { 5,0,0,0,0,0,1,0,0,0,0,0,5 },
+            { 5,5,5,5,5,5,5,5,5,5,5,5,5 }
         };
 
         field = new GameObject[map.GetLength(0), map.GetLength(1)];
@@ -160,6 +215,15 @@ public class GameManagerScript : MonoBehaviour
                     Instantiate(
                         goalPrefab,
                         new Vector3(-(map.GetLength(1) / 2.0f - x), -(map.GetLength(0) / 2.0f - y), 0.01f) ,
+                        Quaternion.identity
+                    );
+                }
+
+                if (map[y, x] == 5)
+                {
+                    field[y, x] = Instantiate(
+                        wallPrefab,
+                        IndexToPosition(new Vector2Int(x, y)),
                         Quaternion.identity
                     );
                 }
@@ -213,6 +277,11 @@ public class GameManagerScript : MonoBehaviour
                 playerindex,
                 playerindex + new Vector2Int(0, -1)
             );
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Reset();
         }
 
         //ƒNƒŠƒA‚µ‚½‚ç
